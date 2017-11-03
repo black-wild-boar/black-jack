@@ -17,11 +17,14 @@ module Mehanika
     MAX_CARDS_COUNT = 3
 
 
-    @@all_cards = [1,6,7,8,9,10]
+    # @@all_cards = [1,6,7,8,9,10]
     @@bank = 0
-    # @@card_count = {v: 10, d: 10, k:10, t: 11}
 
-    # @@all_cards = w%(6, 7, 8, 9, 10, V, D, K, T)
+    @@all_cards = %w(6, 7, 8, 9, 10, V, D, K, T)
+    @@masti = %w(ch kr b p)
+    #array.map.with_index {|x,i| x*i}
+    @@cards_count = {v: 10, d: 10, k: 10, t: 11}
+
     # masti = w%(ch, b, kr, pik) #ASCII code
     # attr_accessor :cash, :name, :cards
 
