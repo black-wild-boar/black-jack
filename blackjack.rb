@@ -1,21 +1,32 @@
 require './player.rb'
 require './dealer.rb'
-
+# require './koloda.rb'
+require './players.rb'
 
 class BlackJack
 
+  def initialize
+    # @koloda = Koloda.new
+    # p @koloda
+    # p @@all_cards
+  end
+
   def welcome
     p 'Welcome to BlackJack game!'
+    @@koloda = Players.new.koloda
     p 'Enter your name'
     name = gets.chomp
 
     @player = Player.new(name)
-    p "Hi, #{name}! You have #{@player.get_cash} cash and #{player_cards} cards"
+    # p "Hi, #{name}! You have #{@player.get_cash} cash and #{player_cards} cards"
 
     @dealer = Dealer.new
+    
     p @player
     p @dealer
-    game
+    
+    p @@koloda
+    # game
   end
 
   def game

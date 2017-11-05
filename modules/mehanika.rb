@@ -7,6 +7,7 @@ module Mehanika
 
   module ClassMethods
 
+
   end
 
   module InstanceMethods
@@ -17,15 +18,8 @@ module Mehanika
     MAX_CARDS_COUNT = 3
 
 
-    # @@all_cards = [1,6,7,8,9,10]
     @@bank = 0
 
-    @@all_cards = %w(6, 7, 8, 9, 10, V, D, K, T)
-    @@masti = %w(ch kr b p)
-    #array.map.with_index {|x,i| x*i}
-    @@cards_count = {v: 10, d: 10, k: 10, t: 11}
-
-    # masti = w%(ch, b, kr, pik) #ASCII code
     # attr_accessor :cash, :name, :cards
 
     def initialize(name, cash = START_CASH, cards_count = 0)
@@ -33,7 +27,13 @@ module Mehanika
       @name = name
       @cards = []
       @cards_count = cards_count
-      first_move
+      # first_move
+      show_koloda
+    end
+
+    def show_koloda
+      @@all_cards = self.class.koloda
+      p @@all_cards
     end
 
     def first_move

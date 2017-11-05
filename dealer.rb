@@ -1,7 +1,9 @@
-class Dealer
-  include Mehanika
+require './players.rb'
+
+class Dealer < Players
+  # include Mehanika
 
   def initialize(name = 'Dealer')
-    super
+    # super
   end
 end
