@@ -1,116 +1,127 @@
 class Players
   @@all_cards = []
-  # @@cards_count = {V: 10, D: 10, K: 10, T: 11}
-  # alias pack_of_cards koloda
   @@players = {}
 
   FIRST_BET = 10
-  WIN = 21
+  WIN_COUNT = 21
   START_CASH = 100
   FIRST_CARDS_COUNT = 2
   MAX_CARDS_COUNT = 3
 
-
   @@bank = 0
-
-  # attr_accessor :cash, :name, :cards
 
   def initialize(name, cash = START_CASH)#, cards_count = 0)
     @cash = cash
     @name = name
     @cards = []
-    # @@players[name]
-    # @cards_count = cards_count
     show_koloda
-
     first_move
   end
 
   def show_koloda
     p 'Pack of cards'
     @@all_cards = self.class.koloda
-    p @@all_cards
   end
 
   def first_move
     @@players[self.instance_variable_get(:@name)] = self
-    p 'Mehanika first_move'
-    # p "#{@name} have #{@cash} money"
+    p "Mehanika first_move #{self}"
     @cash -= FIRST_BET
-    # p "#{@name} have #{@cash} money"
-    p "player #{@name} have #{@cards.count} cards"
     FIRST_CARDS_COUNT.times do
-      p self
       add_card
     end
-    p "first_move #{self}"
   end
 
   def add_card
-    p 'Mehanika add_card'
-    p "@@all_cards #{@@all_cards}"
-    # if cards.count.zero?
-
-    # p "get_card #{@name} have #{@cash} money 5"
+    p "Mehanika add_card #{self}"
     card = @@all_cards.shuffle.first
-    p "Get card #{card}"
     @cards << card
-    # p "@@all_cards #{@@all_cards}"
     @@all_cards.delete(card)
   end
 
   def get_card
-    
-    p 'Mehanika get_card'
-    p self
-
-    p @cards.count < MAX_CARDS_COUNT
-
-    while @cards.count < MAX_CARDS_COUNT
-      
-      if self.is_a?(Player) 
+    p "Mehanika get_card #{self}"
+    while check_cards_count
+      p check_cards_count.inspect
+      p @cards.count
+      if self.is_a?(Player)
         p 'Get more card or open? yes/no/open'
         key = gets.chomp.to_sym
+        choice = {yes: proc {add_card}, no: proc {dealer_choice}, open: proc {open_cards}}
+        choice[key].call
       else
-        key = :yes
+        dealer_choice
       end
-      choice = {yes: add_card, no: '@dealer.choice', open: show_cards}
-      choice[key]
     end
   end
 
-  def show_cards
-    p 'Mehanika show_cards'
-    p @@players.values
-    
+  def check_cards_count
+    if @@players.empty?
+      key = false
+    else      
+      key = true
+      @@players.values.each do | value |
+        key = false if value.instance_variable_get(:@cards).count == MAX_CARDS_COUNT
+      end
+    end
+    return key
+  end
+
+  def dealer_choice
+    p 'dealer_choice'
+    @@players['Dealer'].add_card
+    open_cards
+  end
+
+  def open_cards
+    p 'Mehanika open_cards'
     players = []
     @@players.each do | k, v |
-      name = k
       cards = v.instance_variable_get(:@cards)
-      p "#{@name} have #{@cards} cards. Sum #{cards_sum(cards)}"
-      players << { k => cards_sum(cards) }
+      sum = cards_sum(cards)
+      p "#{k} have #{cards} cards. Sum #{sum}"
+      players << { k => sum }
     end
-    
     who_win?(players)
   end
 
   def who_win?(players)
+    p 'who_win?'
     values = []
     players.each do | player |
       values << player.values[0]
     end
     
-    max_value = values.max
-
-    p players
-
-    players.select do | player |
-      p "#{player.key(max_value)} win!" if player.values[0] == max_value 
-      p "No winners!" if player.values[0] == player.values[1]
+    while values.max > WIN_COUNT do
+      p "max_value = #{max_value}"
+      max_value = values.max
+      values.delete(max_value) if max_value <= WIN_COUNT
     end
+
+    if values.count(max_value) != values.count
+      players.select do | player |
+          p "#{player.key(max_value)} win!" if player.values[0] == max_value 
+      end
+    else
+      p "No winners!"
+    end
+    p @@players
+    @@players.clear
+    p @@players
   end
 
-# ======
+  def show_cards
+    self.instance_variable_get(:@cards)
+  end
+
+  def get_name
+    self.instance_variable_get(:@name)
+  end
+
+  def get_cash
+    self.instance_variable_get(:@cash)
+  end
+
 	def self.koloda
     cards = %w(2 V 8)# 3 4 5 6 7 8 9 10 V D K T)
     # masti in unicode
@@ -127,41 +138,23 @@ class Players
   end
     
   def cards_sum(pack)
-    
     #delete masti
     @@masti.each do |mast|
       pack.map! { |card| card.delete(mast)}
     end
-
     #card_summ
     tsifri = 2..10
     v_t = {V: 10, D: 10, K: 10, T: 11}
-
     sum = 0
     p pack
     pack.each do |card|
-      p "card = #{card}"
       if tsifri.include?(card.to_i)
-        p "tsifra = #{card}"
         sum += card.to_i
       else
         sum += v_t[card.to_sym]
         # if (v_t[card.to_sym] == 11 && (sum + v_t[card.to_sym]) > 21  )
       end
-      
     end
     return sum
-    # p "sum = #{sum}"
-    # return cards_sum
   end
-
 end
-
-# p = Players.new
-# p.koloda
-# p Players.class_variables
-# p p.instance_variables
-
-# # masti = Players.class_variable_get(:@@masti)
-# cards = Players.class_variable_get(:@@all_cards)
-# p.pack_of_cards_count(cards)
