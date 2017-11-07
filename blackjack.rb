@@ -12,11 +12,9 @@ class BlackJack
       p 'Enter your name'
       name = gets.chomp
       @player = Player.new(name)
-      p "Hi, #{@player.get_name}! You have #{@player.get_cash} cash and #{@player.show_cards} cards"
       @dealer = Dealer.new
-      p "#{@dealer.get_name} have #{@dealer.get_cash} cash and #{@dealer.show_cards} cards"
-      p @player
-      p @dealer
+      # p @player
+      # p @dealer
       game
       p 'One more game? (print "no" if you want to stop game)'
       choice = gets.chomp
@@ -24,7 +22,10 @@ class BlackJack
     end
   end
 
+private
   def game
+    @player.show_cards
+    @dealer.show_cards
     @player.get_card
   end
 end

@@ -42,17 +42,20 @@ class Players
   def get_card
     p "Mehanika get_card #{self}"
     while check_cards_count
-      p check_cards_count.inspect
-      p @cards.count
       if self.is_a?(Player)
-        p 'Get more card or open? yes/no/open'
+        p 'Get more card, pass or open? yes/pass/open'
         key = gets.chomp.to_sym
-        choice = {yes: proc {add_card}, no: proc {dealer_choice}, open: proc {open_cards}}
+        choice = {yes: proc {add_more_card}, pass: proc {dealer_choice}, open: proc {open_cards}}
         choice[key].call
       else
         dealer_choice
       end
     end
+  end
+
+  def add_more_card
+    add_card
+    dealer_choice
   end
 
   def check_cards_count
@@ -91,39 +94,49 @@ class Players
     players.each do | player |
       values << player.values[0]
     end
-    
-    while values.max > WIN_COUNT do
-      p "max_value = #{max_value}"
+    values.keep_if { | value | value < WIN_COUNT }
+    if values.empty?
+      p "No winners!"
+    elsif values.count(values.max) == 1
       max_value = values.max
-      values.delete(max_value) if max_value <= WIN_COUNT
-    end
-
-    if values.count(max_value) != values.count
       players.select do | player |
-          p "#{player.key(max_value)} win!" if player.values[0] == max_value 
+        if player.values[0] == max_value
+          p "#{player.key(max_value)} win!" 
+          # get_money(players, max_value)
+        end
       end
     else
       p "No winners!"
     end
-    p @@players
     @@players.clear
-    p @@players
+  end
+
+  def get_money(players)
+    get_cash
   end
 
   def show_cards
-    self.instance_variable_get(:@cards)
+    p 'Mehanika show_cards'
+    # p "#{get_name} have #{show_my_cards} cards" if self.class.is_a?(Player)
+    # p "#{get_name} have #{'*' * show_my_cards} cards" if self.class.is_a?(Dealer)
+    p "#{get_name} have #{show_my_cards} cards" if self.class.name == 'Player'
+    p "#{get_name} have #{'*' * show_my_cards.count} cards" if self.class.name == 'Dealer'
+  end
+
+  def show_my_cards
+    return self.instance_variable_get(:@cards)
   end
 
   def get_name
-    self.instance_variable_get(:@name)
+    return self.instance_variable_get(:@name)
   end
 
   def get_cash
-    self.instance_variable_get(:@cash)
+    return self.instance_variable_get(:@cash)
   end
 
 	def self.koloda
-    cards = %w(2 V 8)# 3 4 5 6 7 8 9 10 V D K T)
+    cards = %w(2 3 4 5 6 7 8 9 10 V D K T)
     # masti in unicode
     @@masti = %w(2660 2663 2665 2666)
     # masti in ascii
@@ -146,13 +159,12 @@ class Players
     tsifri = 2..10
     v_t = {V: 10, D: 10, K: 10, T: 11}
     sum = 0
-    p pack
+    # p pack
     pack.each do |card|
       if tsifri.include?(card.to_i)
         sum += card.to_i
       else
         sum += v_t[card.to_sym]
-        # if (v_t[card.to_sym] == 11 && (sum + v_t[card.to_sym]) > 21  )
       end
     end
     return sum
