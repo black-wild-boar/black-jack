@@ -4,6 +4,6 @@ class Dealer < Players
   # include Mehanika
 
   def initialize(name = 'Dealer')
-    # super
+    super
   end
 end

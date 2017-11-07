@@ -13,7 +13,8 @@ class BlackJack
 
   def welcome
     p 'Welcome to BlackJack game!'
-    @@koloda = Players.new.koloda
+    # @@koloda = Players.koloda
+    Players.koloda
     p 'Enter your name'
     name = gets.chomp
 
@@ -25,22 +26,17 @@ class BlackJack
     p @player
     p @dealer
     
-    p @@koloda
-    # game
+    # p @@koloda
+    game
   end
 
   def game
-    p 'BJ game'
-    player_cards
-    # p "#{player_cards} cards"
-    # p "Dealer have #{ '*' * dealer_cards } cards"
-    # p @dealer.show_cards
-    # p '55555'
-    
-    # dealer_cards
+    # p 'BJ game'
     @player.get_card
-    p 'back to BJ game'
-    player_cards
+    @dealer.get_card
+    # p 'back to BJ game'
+    # player_cards
+    # dealer_cards
 
   end
 
