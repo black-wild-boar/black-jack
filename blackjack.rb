@@ -16,7 +16,7 @@ class BlackJack
       # p @player
       # p @dealer
       game
-      p 'One more game? (print "no" if you want to stop game)'
+      p 'Press any key for new game OR print "no" to stop game'
       choice = gets.chomp
       break if choice.strip == 'no'
     end
