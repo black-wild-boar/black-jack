@@ -1,6 +1,5 @@
 require './player.rb'
 require './dealer.rb'
-# require './koloda.rb'
 require './players.rb'
 require './deck.rb'
 
@@ -14,21 +13,10 @@ class BlackJack
       name = gets.chomp
       @player = Player.new(name)
       @dealer = Dealer.new
-      p Deck.show_deck
-      p @player
-      p @dealer
-      first_move
-      p Deck.show_deck
-      # p @player
-      # p @dealer
-      Deck.cards_sum(@player)
-      Deck.cards_sum(@dealer)
-      @player.get_card
-      
-      # game
-      p 'Press any key for new game OR print "no" to stop game'
+      game
+      p 'Press any key for new game OR print "exit" to stop game'
       choice = gets.chomp
-      break if choice.strip == 'no'
+      break if choice.strip == 'exit'
     end
   end
 
@@ -37,24 +25,25 @@ class BlackJack
     @dealer.first_move
   end
 
-  def get_card
-    if self.is_a?(Player)
-      p 'Get more card, pass or open? yes/pass/open'
-      key = gets.chomp.to_sym
-      choice = {yes: proc {add_more_card}, pass: proc {dealer_choice}, open: proc {open_cards}}
-      choice[key].call
-    else
-      @dealer.get_card
-    end
+  def game
+    first_move
+    @player.cards
+    @dealer.cards
+    get_card?(@player)
   end
 
-
-
-private
-  def game
-    @player.show_cards
-    @dealer.show_cards
-    @player.get_card
+  def get_card?(player)
+    loop do
+      p 'Get more card, pass or open? yes/pass/open'
+      choice = %w(yes pass open)
+      key = gets.chomp
+      if choice.include?(key)
+        @player.choice(key.to_sym)
+        break
+      else
+        p 'Wrong choice!'
+      end
+    end
   end
 end
 

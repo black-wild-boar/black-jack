@@ -1,5 +1,4 @@
 require './deck.rb'
-require './cash.rb'
 
 class Players
   @@players = {}
@@ -13,121 +12,87 @@ class Players
   def initialize(name, cash = START_CASH)
     @cash = cash
     @name = name
-    @cards = []
+    @cards = Deck.new
+    @@players[name] = self
     @@bank ||= 0
   end
-#+
-  def first_move
-    @@players[self.instance_variable_get(:@name)] = self
-    # p "Mehanika first_move #{self}"
-    @cash -= FIRST_BET
-    @@bank += FIRST_BET
-    FIRST_CARDS_COUNT.times do
-      Deck.add_card(self)
-    end
+
+  def cards_show
+    @cards.show
   end
 
-  def add_more_card
-    add_card
-    dealer_choice
-  end
-
-#+ Deck
-  # def check_cards_count
-  #   if @@players.empty?
-  #     key = false
-  #   else      
-  #     key = true
-  #     @@players.values.each do | value |
-  #       key = false if value.instance_variable_get(:@cards).count == MAX_CARDS_COUNT
-  #     end
-  #   end
-  #   return key
-  # end
-
-#+ Dealer
-  # def dealer_choice
-  #   # p 'Dealer_choice'
-  #   dealer = @@players['Dealer']
-  #   # p "dealer = #{dealer}"
-  #   dealer_cards = dealer.instance_variable_get(:@cards)
-  #   # p dealer_cards
-  #   sum =  cards_sum(dealer_cards)
-  #   # p sum
-
-  #   # 15 magic
-  #   if sum < 15 && dealer_cards.count < 3 
-  #     key = :yes
-  #   else
-  #     key = :pass
-  #   end
-  #   choice = {yes: proc {dealer.add_more_card}, pass: proc {open_cards}}
-  #   choice[key].call
-  # end
-
-  def open_cards
-    # p 'Mehanika open_cards'
-    players = []
-    @@players.each do | k, v |
-      cards = v.instance_variable_get(:@cards)
-      sum = cards_sum(cards)
-      p "#{k} have #{cards} cards. Sum #{sum}"
-      players << { k => sum }
-    end
-    who_win?(players)
-  end
-
-  def who_win?(players)
-    p 'Who_win?'
-    values = []
-    players.each do | player |
-      values << player.values[0]
-    end
-    values.keep_if { | value | value <= WIN_COUNT }
-    if values.empty?
-      p "No winners!"
-    elsif values.count(values.max) == 1
-      max_value = values.max
-      players.select do | player |
-        if player.values[0] == max_value
-          p "#{player.key(max_value)} win!" 
-          get_bank(player)
-        end
-      end
-    else
-      p "No winners!"
-    end
-    @@players.clear
-    @@bank = 0
-  end
-
-  def get_bank(winner)
-    key = winner.keys[0]
-    cash = @@players[key].instance_variable_get(:@cash)
-    cash += @@bank
-    @@players[key].instance_variable_set(:@cash, cash)
+  def self.show_players
     p @@players
   end
 
-  def show_cards
-    # p 'Mehanika show_cards'
-    #not work
-    # p "#{get_name} have #{show_my_cards} cards" if self.class.is_a?(Player)
-    # p "#{get_name} have #{'*' * show_my_cards} cards" if self.class.is_a?(Dealer)
-    #work
-    p "#{get_name} have #{show_my_cards} cards" if self.class.name == 'Player'
-    p "#{get_name} have #{'*' * show_my_cards.count} cards" if self.class.name == 'Dealer'
+  def first_move
+    @cash -= FIRST_BET
+    @@bank += FIRST_BET
+    FIRST_CARDS_COUNT.times do
+      @cards.add_card
+    end
   end
 
-  def show_my_cards
-    return self.instance_variable_get(:@cards)
+  def get_card
+    @cards.add_card
+    if self.is_a?(Player)
+      dealer_choice
+    else
+      self.class.open_cards
+    end
   end
 
-  def get_name
-    return self.instance_variable_get(:@name)
+  def cards_sum
+    @cards.sum
   end
 
-  def get_cash
-    return self.instance_variable_get(:@cash)
+  def cards_count
+    @cards.count
+  end
+
+  def cards
+    p "#{@name} have #{cards_show} cards" if self.class.name == 'Player'
+    p "#{@name} have #{'*' * cards_count} cards" if self.class.name == 'Dealer'
+  end
+
+  def self.open_cards
+    @@players.each do | name, player |
+      cards = player.instance_variable_get(:@cards)
+      p "Player #{name} have #{cards.show} cards. #{cards.sum} points"
+    end
+    who_win?
+  end
+
+  def dealer_choice
+    @@players['Dealer'].choice
+  end
+
+  def self.who_win?
+    p 'Who win?'
+    rates = []
+    players = @@players.values
+    players.each do | player |
+      cards = player.instance_variable_get(:@cards)
+      rates << cards.sum
+    end
+    rates.keep_if { | value |  value <= WIN_COUNT }
+    max = rates.max
+    if rates.empty?
+      p "No winners!"
+    elsif rates.count(max) == 1
+      winner_name(max)
+    else
+      p "No winners!"
+    end
+  end
+
+  def self.winner_name(sum)
+    @@players.each do | name, player |
+      cards = player.instance_variable_get(:@cards)
+      cash =  player.instance_variable_get(:@cash) + @@bank
+      p "#{name} win! #{cash} cash." if cards.sum == sum
+    end
+    @@players.clear
+    @@bank = 0
   end
 end
